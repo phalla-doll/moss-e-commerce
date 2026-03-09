@@ -1,5 +1,16 @@
+'use client';
+
 import Image from 'next/image';
-import { ChevronDown, Filter, ArrowUpRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter, ArrowUpRight } from 'lucide-react';
+import { useState } from 'react';
+
+const filterOptions = {
+  'Category': ['Kitchen Gear', 'Self Care', 'Home Decor', 'Apparel', 'Tech'],
+  'Price Range': ['Under £50', '£50 - £100', '£100 - £200', 'Over £200'],
+  'Color': ['Black', 'White', 'Orange', 'Wood', 'Silver'],
+  'Brands': ['Moss', 'Peugeot', 'Onetwo', 'Solros'],
+  'Fast Shipping': ['Available', 'Not Available']
+};
 
 export default function Page() {
   return (
@@ -49,11 +60,8 @@ export default function Page() {
           </div>
           
           <div className="flex flex-col">
-            {['Category', 'Price Range', 'Color', 'Brands', 'Fast Shipping'].map((filter, i) => (
-              <div key={filter} className="px-8 py-5 border-b border-moss-border flex items-center justify-between cursor-pointer hover:bg-black/5 transition-colors">
-                <span className="text-[11px] tracking-widest uppercase font-medium">{filter}</span>
-                <ChevronDown className="w-4 h-4 opacity-30" />
-              </div>
+            {Object.entries(filterOptions).map(([title, options]) => (
+              <FilterSection key={title} title={title} options={options} />
             ))}
           </div>
 
@@ -197,6 +205,47 @@ function PromoCard({ title, image }: { title: string, image: string }) {
         </div>
         <ArrowUpRight className="w-4 h-4 opacity-80 mb-1" />
       </div>
+    </div>
+  );
+}
+
+function FilterSection({ title, options }: { title: string, options: string[] }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const toggleOption = (option: string) => {
+    setSelected(prev => 
+      prev.includes(option) ? prev.filter(o => o !== option) : [...prev, option]
+    );
+  };
+
+  return (
+    <div className="border-b border-moss-border flex flex-col">
+      <div 
+        className="px-8 py-5 flex items-center justify-between cursor-pointer hover:bg-black/5 transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="text-[11px] tracking-widest uppercase font-medium">{title}</span>
+        {isOpen ? <ChevronUp className="w-4 h-4 opacity-30" /> : <ChevronDown className="w-4 h-4 opacity-30" />}
+      </div>
+      {isOpen && (
+        <div className="px-8 pb-5 flex flex-col gap-3">
+          {options.map(option => (
+            <label key={option} className="flex items-center gap-3 cursor-pointer group">
+              <div className={`w-4 h-4 border flex items-center justify-center transition-colors ${selected.includes(option) ? 'bg-moss-text border-moss-text' : 'border-moss-border group-hover:border-moss-text'}`}>
+                {selected.includes(option) && <div className="w-2 h-2 bg-white" />}
+              </div>
+              <span className="text-[12px] opacity-80 group-hover:opacity-100 transition-opacity">{option}</span>
+              <input 
+                type="checkbox" 
+                className="hidden" 
+                checked={selected.includes(option)}
+                onChange={() => toggleOption(option)}
+              />
+            </label>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
